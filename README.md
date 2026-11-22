@@ -1,67 +1,93 @@
 # BYD France: Business Intelligence & Market Analytics
 
-End-to-end Business Intelligence project analysing BYD's performance in the French new passenger car market, with a focus on electric (BEV) and plug-in hybrid (PHEV) vehicles.
+End-to-end BI project measuring **BYD's performance in the French new passenger-car market** against its competitors, built on 34 monthly registration reports from CCFA (data: AAA-DATA), January 2024 – October 2026.
 
-**Status:** work in progress (Phase 1: data sourcing and verification)
+**Status (22 November 2026):** data pipeline, SQL model and KPI specification complete and validated. The Power BI dashboard is in progress: the data package and DAX measures exist, but the report hasn't been built yet. No Tableau dashboard yet.
 
-## Business questions
+## Headline findings (descriptive)
 
-| # | Question |
+| Measure | Value |
 |---|---|
-| 1 | How is BYD performing in France? |
-| 2 | Which BYD models contribute most to registrations? |
-| 3 | How is BYD growing over time? |
-| 4 | How does BYD compare with competitors? |
-| 5 | What opportunities exist in the French EV market? |
-| 6 | What commercial recommendations can we make? |
+| BYD registrations, Jan–Oct 2026 | **28 086** (Jan–Oct 2025: 9 843) |
+| BYD growth, Jan–Oct 2026 vs Jan–Oct 2025 | **+185.3%** (market: +4.4%) |
+| BYD market share, Jan–Oct 2026 | **2.03%** (October 2026 alone: 3.63%) |
+| BYD rank among listed brands | **32nd of 40** (Jan–Oct 2024) → **16th of 44** (Jan–Oct 2026) |
+| Competitors, Jan–Oct 2026 | Tesla 47 609 (+117.1%) · MG 29 524 (+23.7%) · Leapmotor 7 292 (+172.6%) · Xpeng 6 254 (+154.1%) |
+| Chinese-owned brands' combined share, Jan–Oct 2026 | **7.07%–7.20%** (range explained in the KPI definitions) |
 
-## Methodology
+These are **registrations, not retail sales**. They include fleet, rental and demonstration cars. The data doesn't contain the reasons behind any trend (pricing, incentives, fleet deals), so none are claimed. All CCFA figures are provisional.
 
-| Phase | Description | Status |
+## Business questions and coverage
+
+| # | Question | Covered? |
 |---|---|---|
-| 1 | Data sourcing and verification | In progress |
-| 2 | Data cleaning with Python | Not started |
-| 3 | Exploratory data analysis | Not started |
-| 4 | SQL database design and analysis (MySQL) | Not started |
-| 5 | KPI development | Not started |
-| 6 | Tableau dashboard | Not started |
-| 7 | Power BI dashboard | Not started |
-| 8 | Business insights and recommendations | Not started |
-| 9 | Documentation and portfolio publication | Not started |
+| Q1 | How is BYD performing in France? | ✅ Notebook 03, SQL Q1.1–Q1.2 |
+| Q2 | Which BYD models contribute most? | ❌ Not possible with this data. CCFA's monthly tables are by brand only; there's no model-level source in the repo yet |
+| Q3 | How is BYD growing over time? | ✅ Notebook 03, SQL Q3.1–Q3.2 |
+| Q4 | How does BYD compare with competitors? | ✅ Notebook 03, SQL Q4.1–Q4.3 |
+| Q5 | What opportunities exist? | ◑ Descriptive only: the rise of Chinese-owned brands and the competitive positioning (SQL Q5.1–Q5.3) |
+| Q6 | What commercial recommendations can we make? | ⏳ Phase 8, not started |
 
-## Data sources
+**Scope note:** the data has **no powertrain split by brand** (BEV/PHEV), so this project doesn't measure BYD's share of the electric market.
 
-| Source | Content | Granularity |
-|---|---|---|
-| CCFA / AAA-DATA monthly registrations | New passenger car registrations by brand (incl. BYD and competitors) | Brand x month |
-| SDES (French Ministry of Ecological Transition) | Market share by powertrain (BEV, PHEV, petrol, diesel) | Market x month |
-| PFA / AAA-DATA press kit | Top 100 models | Model x year-to-date |
+## Project phases (verified against the files and commit history)
 
-Full details (URLs, reporting periods, publication dates) are in [docs/source_register.csv](docs/source_register.csv).
+| Phase | Description | Status | Evidence |
+|---|---|---|---|
+| 1 | Data sourcing and verification | ✅ Complete | 34 CCFA PDFs in `data/raw/`; every file registered with its URL in `docs/source_register.csv`; `notebooks/01_data_extraction.ipynb` |
+| 2 | Data cleaning (Python) | ✅ Complete | `notebooks/02_data_cleaning.ipynb` → `data/processed/` |
+| 3 | Exploratory data analysis | ✅ Complete | `notebooks/03_eda.ipynb` (executed, 8 charts, validation checks) |
+| 4 | SQL model and business queries (MySQL 8) | ✅ Complete | `sql/01`–`06`; notebooks 04–05 executed on MySQL 8.0.46 |
+| 5 | KPI definitions | ✅ Complete | `docs/kpi_definitions.md`: 12 KPIs in SQL and DAX |
+| 6 | Tableau dashboard | ⏳ Not started | – |
+| 7 | Power BI dashboard | 🔶 In progress | `data/powerbi/`: data package, 23 DAX measures, setup guide. No `.pbix` yet; the DAX hasn't been run in Power BI yet |
+| 8 | Insights and recommendations | 🔶 Partial | Descriptive findings in notebook 03; no recommendations yet |
+| 9 | Documentation and publication | 🔶 In progress | This README; audit 22 Nov 2026 |
+
+## Validation
+
+Every published figure is reproducible, and **`python scripts/validate_project.py --pdf --powerbi data/powerbi` runs 29 automated checks**:
+
+* **Extraction:** an independent re-extraction of all 34 PDFs with a second tool (`pdftotext`) matches every monthly and year-to-date count. CCFA's printed market shares match registrations ÷ market for all 1 474 rows (≤ 0.0005 pp, rounding only).
+* **Reconciliation:** the brands in the comparison universe add up to CCFA's market total every month. Every year-to-date discrepancy is logged as a CCFA revision. AUTRES restatements are fully explained by brands entering or leaving CCFA's list.
+* **Growth cross-check:** our year-on-year growth equals **CCFA's own printed growth** for all 852 comparable brand rows (≤ 0.1 pp).
+* **Reproducibility:** re-running notebooks 01 and 02 on the raw PDFs reproduces the committed CSVs byte for byte.
+* **SQL:** 22 load checks and 28 view checks pass on MySQL 8.0.46 (notebooks 04–05).
 
 ## Data integrity rules
 
-Only real, traceable sources are used; no registration figures are invented. Every figure is labelled as actual, derived or estimated. Missing observations are stored as missing, never as zero. BYD-specific figures are kept separate from aggregate French market data, and figures from sources with different scopes (e.g. CCFA vs SDES) are not combined in one ratio.
-
-## Known limitations
-
-No official open dataset splits registrations by brand and powertrain, so BYD's share of the BEV market cannot be calculated from official data alone. Model-level data covers only the Top 100 models. Registrations include demonstration and short-term rental vehicles, so they are not equal to retail sales.
-
-## Tools
-
-Python (Pandas) in Google Colab, MySQL, Excel, Tableau, Power BI, GitHub.
+Only traceable sources are used. Each value is labelled `actual`, `aggregated` (Fiat + Abarth) or `imputed` (one cell: Jaguar's year-to-date for January 2025, blank in the source PDF). Missing observations stay empty, never 0. Published year-to-date figures are never recalculated. The raw files are never edited.
 
 ## Repository structure
 
 ```
-byd-france-bi/
-  data/raw/          original source files, never edited
-  data/processed/    clean CSVs produced by notebooks
-  notebooks/         Colab notebooks in execution order
-  sql/               MySQL schema and analysis queries
-  docs/              source register and documentation
+data/raw/          CCFA monthly PDFs (+ one PFA flash report), never edited
+data/processed/    extraction output and cleaned star-schema CSVs (notebooks 01-02)
+data/powerbi/      Power BI data package, DAX measures, setup and validation guide
+notebooks/         01 extraction · 02 cleaning · 03 EDA · 04 SQL model · 05 SQL views and queries
+sql/               01 schema · 02 load · 03 load checks · 04 views · 05 business queries · 06 view checks · 07 Power BI extract
+scripts/           validate_project.py (automated checks)
+docs/              source_register.csv · kpi_definitions.md
 ```
+
+## How to reproduce
+
+1. **Extraction and cleaning:** run `notebooks/01` then `02` in Google Colab (they install `pdfplumber` and ask for the repo ZIP or the raw CSV).
+2. **EDA:** run `notebooks/03` with the three files from `data/processed/`.
+3. **SQL:** run `notebooks/04` and `05` in Colab. They install MySQL 8 inside the session and run `sql/01`–`06`.
+4. **Check everything:** `pip install pandas`, then `python scripts/validate_project.py` (add `--pdf` if poppler's `pdftotext` is installed).
+
+## Known limitations
+
+* No official dataset splits registrations by brand **and** powertrain, so BEV/PHEV shares by brand can't be measured.
+* Brands that CCFA doesn't list separately sit inside "AUTRES". The Chinese-owned share is therefore a range, from listed brands only up to listed brands plus AUTRES.
+* Ownership flags (`dim_brand.csv`) reflect general industry knowledge as of November 2026, not CCFA data. One judgement call: Leapmotor is classified by its parent company (Chinese). In Europe it is distributed through Leapmotor International, a joint venture with Stellantis.
+* 2026 covers January–October only. Full-year 2026 isn't estimated.
+
+## Sources and licensing
+
+Registration data: **CCFA (Comité des Constructeurs Français d'Automobiles), data AAA-DATA**, monthly "Immatriculations VP" reports. Every file and URL is listed in [`docs/source_register.csv`](docs/source_register.csv). CCFA reserves all reproduction rights, including for its downloadable documents. The original PDFs are kept in this repository for private reproducibility only and are © CCFA.
 
 ## Author
 
-Muhammad Asad Zaheer, MSc Data & Business Analytics, Rennes School of Business
+Muhammad Asad Zaheer, MSc Data & Business Analytics, Rennes School of Business · [LinkedIn](https://www.linkedin.com/in/asadzaheerportfolio)
