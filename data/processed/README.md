@@ -1,7 +1,14 @@
 # data/processed
 
-Clean, analysis-ready CSV files produced only by the notebooks in /notebooks.
+Produced only by notebooks 01 and 02 (reproducible byte for byte from `data/raw/`).
 
-Planned main table: brand_month.csv (one row per brand per month, with source_id and publication date on every row).
+| File | Rows | Content |
+|---|---|---|
+| `brand_month_raw.csv` | 1 475 | Every brand row and Total row exactly as printed in the 34 PDFs (labels as printed) |
+| `extraction_checks.csv` | 34 | Per PDF: brand rows found; sum of brands vs printed total (month and YTD) |
+| `ytd_revisions_log.csv` | 52 | Months where published YTD ≠ previous YTD + month (CCFA revisions: 37 brand, 15 market) |
+| `brand_month.csv` | 1 734 | 51 brands × 34 months; `value_type` actual / aggregated / imputed / not_listed; `in_market_sum` defines the comparison universe |
+| `market_month.csv` | 34 | CCFA market totals (month and published YTD) |
+| `dim_brand.csv` | 51 | Brand ownership and origin flags, with the classification rule |
 
-Missing observations are stored as empty values (NULL), never as 0.
+Missing observations are empty (NULL), never 0. `source_id` and `source_file` on every row link to `docs/source_register.csv`.
