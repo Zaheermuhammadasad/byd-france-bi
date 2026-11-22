@@ -4,6 +4,8 @@
 // How to use: in Power BI Desktop select the _Measures table > New measure,
 // then paste ONE block at a time (from the measure name down to the blank line).
 // Create them in this order, because later measures use earlier ones.
+// Updated 22 Nov 2026 (audit): prior-year measures read the period end from the
+// last date in context; rank uses ALL ( dim_brand ).
 // =====================================================================
 
 // ---------- K01 · Registrations ----------
@@ -30,8 +32,9 @@ Market share % (month) =
 
 // ---------- K04 · Registration growth vs same period last year ----------
 Registrations (same period LY) =
-VAR y = MAX ( dim_date[year] )
-VAR m = MAX ( dim_date[month] )          -- 12 for a full year, 10 for Jan-Oct
+VAR last_date = MAX ( dim_date[date_key] )   -- period end: Dec for a full year, Oct for 2026
+VAR y = YEAR ( last_date )
+VAR m = MONTH ( last_date )
 RETURN
     CALCULATE ( [Registrations (period)],
                 REMOVEFILTERS ( dim_date ), dim_date[year] = y - 1, dim_date[month] = m )
@@ -42,8 +45,9 @@ RETURN IF ( ISBLANK ( ratio ), BLANK (), ratio - 1 )   -- never "-100%" when las
 
 // ---------- K05 · Share change vs same period last year ----------
 Market share % (same period LY) =
-VAR y = MAX ( dim_date[year] )
-VAR m = MAX ( dim_date[month] )
+VAR last_date = MAX ( dim_date[date_key] )
+VAR y = YEAR ( last_date )
+VAR m = MONTH ( last_date )
 VAR mkt_ly = CALCULATE ( [Market registrations (period)],
                          REMOVEFILTERS ( dim_date ), dim_date[year] = y - 1, dim_date[month] = m )
 RETURN DIVIDE ( [Registrations (same period LY)], mkt_ly )
@@ -61,13 +65,13 @@ IF ( NOT HASONEVALUE ( dim_brand[brand] )
      || ISBLANK ( cur )
      || SELECTEDVALUE ( dim_brand[brand] ) = "Other brands (AUTRES)",
      BLANK (),
-     RANKX ( FILTER ( ALL ( dim_brand[brand] ),
+     RANKX ( FILTER ( ALL ( dim_brand ),
                       dim_brand[brand] <> "Other brands (AUTRES)"
                       && NOT ISBLANK ( [Registrations (period)] ) ),
              [Registrations (period)], cur, DESC, SKIP ) )
 
 Brands ranked (period) =
-COUNTROWS ( FILTER ( ALL ( dim_brand[brand] ),
+COUNTROWS ( FILTER ( ALL ( dim_brand ),
                      dim_brand[brand] <> "Other brands (AUTRES)"
                      && NOT ISBLANK ( [Registrations (period)] ) ) )
 
@@ -122,8 +126,9 @@ DIVIDE ( CALCULATE ( [Registrations (period)], REMOVEFILTERS ( dim_brand ), dim_
 
 // ---------- K12 · Market growth and seasonality index ----------
 Market growth % vs LY =
-VAR y = MAX ( dim_date[year] )
-VAR m = MAX ( dim_date[month] )
+VAR last_date = MAX ( dim_date[date_key] )
+VAR y = YEAR ( last_date )
+VAR m = MONTH ( last_date )
 VAR prev = CALCULATE ( [Market registrations (period)], REMOVEFILTERS ( dim_date ),
                        dim_date[year] = y - 1, dim_date[month] = m )
 VAR ratio = DIVIDE ( [Market registrations (period)], prev )

@@ -11,7 +11,8 @@ Everything Power BI needs, so the Windows laptop needs **no MySQL install**.
 | `measures.dax` | 23 measures | Paste-ready DAX, copied unchanged from `docs/kpi_definitions.md` |
 | `MANIFEST.sha256` | – | Fingerprints of the four CSVs |
 
-**Provenance.** Exported from the SQL views in `sql/04_views.sql`, run on an exact replica of the MySQL model built from the validated Phase 2 v2 files. Before export, the replica passed the same 28 view checks that passed on MySQL 8.0.46 (Notebook 05). After export, the KPIs were recalculated from these four CSVs and matched the validated values below.
+**Provenance.** Produced by the four queries in [`sql/07_powerbi_extract.sql`](../../sql/07_powerbi_extract.sql), run against the views in `sql/04_views.sql`. The committed files were exported from an exact replica of the MySQL model built from the validated Phase 2 v2 files. Before export, the replica passed the same 28 view checks that passed on MySQL 8.0.46 (Notebook 05).
+**Check the package at any time:** `python scripts/validate_project.py --powerbi data/powerbi`. It verifies the file fingerprints, row counts and reconciliation, and emulates the DAX prior-year logic.
 **Missing values** are empty cells, never 0.
 
 ---
@@ -54,6 +55,7 @@ Delete any relationship Power BI created automatically, then create exactly thes
 **No relationship between `dim_brand` and `v_market_month`**: the market total must not change when a brand is selected.
 
 ### 6 · Create the measures
+*Use the 22 Nov 2026 version of `measures.dax` (audit fixes to the prior-year and rank measures).*
 **Home → Enter data** → name the table `_Measures` → Load. Select `_Measures` → **New measure** → paste the measures from `measures.dax` **one at a time, in file order**.
 Formats: shares and growth → Percentage (2 and 1 decimals); `Share change pp vs LY` → Decimal, 2 decimals; registrations → Whole number with thousands separator.
 
@@ -83,6 +85,8 @@ Then compare with the expected values. **Every number must match before building
 | 2025 | Xpeng | Growth % vs LY | **blank** (no 2024 figure, not −100%) |
 | 2025 | (any) | Chinese-owned share % (lower) / Market growth % vs LY | 4.20% / −5.02% |
 | 2024 | BYD | Registrations (period) / Rank (period) | 5 415 / 30 |
+| **no year selected** | BYD | Growth % vs LY | **+185.3%** (latest Jan–Oct vs Jan–Oct; must **not** show 107.5%) |
+| 2026 + slicer `dim_brand[is_chinese_owned]` = 1 | BYD | Rank (period) | **16** (rank stays market-wide) |
 
 If a value doesn't match, take a screenshot of the table and the measure formula. Don't adjust the formula until we've found the cause.
 
