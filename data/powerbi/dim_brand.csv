@@ -1,0 +1,52 @@
+brand,brand_origin_country,controlling_owner,controlling_owner_country,ownership_structure,is_chinese_owned,is_chinese_origin,is_joint_venture,is_byd,is_residual
+Abarth,Italy,Stellantis,Netherlands,wholly owned,0,0,0,0,0
+Alfa Romeo,Italy,Stellantis,Netherlands,wholly owned,0,0,0,0,0
+Alpine,France,Renault Group,France,wholly owned,0,0,0,0,0
+Audi,Germany,Volkswagen Group,Germany,wholly owned,0,0,0,0,0
+BMW,Germany,BMW Group,Germany,wholly owned,0,0,0,0,0
+BYD,China,BYD Company,China,independent,1,1,0,1,0
+Chery,China,Chery Automobile,China,wholly owned,1,1,0,0,0
+Citroën,France,Stellantis,Netherlands,wholly owned,0,0,0,0,0
+Cupra,Spain,Volkswagen Group,Germany,wholly owned,0,0,0,0,0
+DS,France,Stellantis,Netherlands,wholly owned,0,0,0,0,0
+Dacia,Romania,Renault Group,France,wholly owned,0,0,0,0,0
+Ferrari,Italy,Ferrari N.V.,Italy,independent,0,0,0,0,0
+Fiat,Italy,Stellantis,Netherlands,wholly owned,0,0,0,0,0
+Fiat + Abarth,Italy,Stellantis,Netherlands,wholly owned,0,0,0,0,0
+Ford,USA,Ford Motor Company,USA,wholly owned,0,0,0,0,0
+Geely,China,Geely Holding,China,wholly owned,1,1,0,0,0
+Honda,Japan,Honda Motor Co.,Japan,wholly owned,0,0,0,0,0
+Hyundai,South Korea,Hyundai Motor Group,South Korea,wholly owned,0,0,0,0,0
+Jaecoo,China,Chery Automobile,China,wholly owned,1,1,0,0,0
+Jaguar,United Kingdom,Tata Motors (JLR),India,wholly owned,0,0,0,0,0
+Jeep,USA,Stellantis,Netherlands,wholly owned,0,0,0,0,0
+Kia,South Korea,Hyundai Motor Group,South Korea,group controlled,0,0,0,0,0
+Lancia,Italy,Stellantis,Netherlands,wholly owned,0,0,0,0,0
+Land Rover,United Kingdom,Tata Motors (JLR),India,wholly owned,0,0,0,0,0
+Leapmotor,China,Zhejiang Leapmotor Technology,China,independent (minority partner),1,1,0,0,0
+Lexus,Japan,Toyota Motor Corporation,Japan,wholly owned,0,0,0,0,0
+Lynk & Co,China,Geely Holding,China,group controlled,1,1,0,0,0
+MG,United Kingdom,SAIC Motor,China,wholly owned,1,0,0,0,0
+Maserati,Italy,Stellantis,Netherlands,wholly owned,0,0,0,0,0
+Mazda,Japan,Mazda Motor Corporation,Japan,independent,0,0,0,0,0
+Mercedes-Benz,Germany,Mercedes-Benz Group,Germany,wholly owned,0,0,0,0,0
+Mini,United Kingdom,BMW Group,Germany,wholly owned,0,0,0,0,0
+Mitsubishi,Japan,Mitsubishi Motors,Japan,independent,0,0,0,0,0
+Nissan,Japan,Nissan Motor Co.,Japan,independent,0,0,0,0,0
+Omoda,China,Chery Automobile,China,wholly owned,1,1,0,0,0
+Opel,Germany,Stellantis,Netherlands,wholly owned,0,0,0,0,0
+Other brands (AUTRES),,,,,0,0,0,0,1
+Peugeot,France,Stellantis,Netherlands,wholly owned,0,0,0,0,0
+Porsche,Germany,Volkswagen Group,Germany,majority owned,0,0,0,0,0
+Renault,France,Renault Group,France,wholly owned,0,0,0,0,0
+Seat,Spain,Volkswagen Group,Germany,wholly owned,0,0,0,0,0
+Skoda,Czechia,Volkswagen Group,Germany,wholly owned,0,0,0,0,0
+Skyworth,China,Skyworth Group,China,group controlled,1,1,0,0,0
+Smart,Germany,Mercedes-Benz Group / Geely Holding (50/50 JV),Germany / China,joint venture (50/50),0,0,1,0,0
+Suzuki,Japan,Suzuki Motor Corporation,Japan,independent,0,0,0,0,0
+Tesla,USA,"Tesla, Inc.",USA,independent,0,0,0,0,0
+Toyota,Japan,Toyota Motor Corporation,Japan,wholly owned,0,0,0,0,0
+Volkswagen,Germany,Volkswagen Group,Germany,wholly owned,0,0,0,0,0
+Volvo,Sweden,Geely Holding,China,majority owned,1,0,0,0,0
+Xpeng,China,XPeng Inc.,China,independent,1,1,0,0,0
+Zeekr,China,Geely Holding,China,group controlled,1,1,0,0,0
