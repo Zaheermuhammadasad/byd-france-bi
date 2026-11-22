@@ -1,7 +1,10 @@
 # data/raw
 
-Original source files exactly as downloaded (CCFA monthly PDFs, SDES xlsx, PFA press kits).
+Original source files, exactly as downloaded. **Never edited**: all processing writes to `data/processed/`.
 
-Rule: never edit these files. All cleaning happens in notebooks and is written to data/processed.
+* 34 CCFA monthly "Immatriculations VP" PDFs, January 2024 – October 2026 (data: AAA-DATA)
+* 1 PFA monthly flash report (July 2026), registered as SRC004 (context only, not used in the analysis)
 
-Every file here must have a matching row in docs/source_register.csv (URL, reporting period, publication date, retrieval date).
+Every file has a row in `docs/source_register.csv` with its URL and reporting period.
+
+**Rights:** these documents are © CCFA / PFA. CCFA's legal notice reserves all reproduction rights, including for downloadable documents, and forbids electronic reproduction without its express authorisation. They are kept here for private reproducibility. Download them from the URLs in the register.
