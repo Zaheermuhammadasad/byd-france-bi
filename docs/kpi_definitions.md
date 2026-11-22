@@ -8,7 +8,7 @@ Each KPI is defined once, in SQL (the MySQL views in `sql/04_views.sql`) and in 
 | Data | CCFA / AAA-DATA monthly registrations by brand, January 2024 – October 2026 (provisional) |
 | Validated by | `sql/06_view_checks.sql` (28 checks, all PASS on MySQL 8.0.46) and Notebook 03 |
 | Status of DAX | Written to this spec; **validated in Phase 7** by reproducing the "Validated value" column in Power BI |
-| Last updated | 21 November 2026 |
+| Last updated | 22 November 2026 (audit fixes: prior-year logic, market-wide rank) |
 
 ---
 
@@ -29,7 +29,7 @@ Import from MySQL: `dim_date`, `dim_brand`, `v_brand_month`, `v_market_month`.
 Relationships (one-to-many, single direction): `dim_date[date_key]` → `v_brand_month[date_key]` and `v_market_month[date_key]`; `dim_brand[brand]` → `v_brand_month[brand]`.
 `v_market_month` has **no** relationship to `dim_brand`, so the market total is never filtered by a brand selection.
 Boolean flags arrive from MySQL as 1 / 0.
-**Period measures expect one year in context** (a year slicer). The month in context sets the period end: Oct for 2026, Dec for 2024–2025.
+**Period measures use the last date in context as the period end** (Dec for 2024–2025, Oct for 2026). Use a single-year slicer for full-year vs Jan–Oct comparisons. With several years selected, the measures report the latest year to date.
 
 ---
 
@@ -108,8 +108,9 @@ SELECT period_label, registrations_prev_year, growth_pct FROM v_brand_period WHE
 ```
 ```dax
 Registrations (same period LY) :=
-VAR y = MAX ( dim_date[year] )
-VAR m = MAX ( dim_date[month] )          -- 12 for a full year, 10 for Jan-Oct
+VAR last_date = MAX ( dim_date[date_key] )   -- period end: Dec for a full year, Oct for 2026
+VAR y = YEAR ( last_date )
+VAR m = MONTH ( last_date )
 RETURN
     CALCULATE ( [Registrations (period)],
                 REMOVEFILTERS ( dim_date ), dim_date[year] = y - 1, dim_date[month] = m )
@@ -118,7 +119,9 @@ Growth % vs LY :=
 VAR ratio = DIVIDE ( [Registrations (period)], [Registrations (same period LY)] )
 RETURN IF ( ISBLANK ( ratio ), BLANK (), ratio - 1 )   -- never "-100%" when last year is missing
 ```
-**Common mistake avoided.** `DIVIDE(cur, prev) - 1` returns −100% when `prev` is blank, because BLANK − 1 = −1. The `IF(ISBLANK(...))` guard keeps it blank.
+**Common mistakes avoided.**
+* `DIVIDE(cur, prev) - 1` returns −100% when `prev` is blank, because BLANK − 1 = −1. The `IF(ISBLANK(...))` guard keeps it blank.
+* Taking `MAX(year)` and `MAX(month)` separately breaks when several years are in context (no year slicer). Max year = 2026 and max month = 12 would compare Jan–Oct 2026 with **full-year 2025** (BYD: 107.5% instead of 185.3%). The year and month are therefore read from the **last date** in context, the same date `LASTDATE` uses for the current period. *(Fixed after the 22 Nov 2026 audit.)*
 **Validated value.** BYD: FY 2025 **+149.9%** · Jan–Oct 2025 **+231.6%** · Jan–Oct 2026 **+185.3%**. Jan–Oct 2026: Tesla **+117.1%**, MG **+23.7%**, Leapmotor **+172.6%**, Xpeng **+154.1%**. Xpeng Jan–Oct 2025: **blank** (no 2024 figure).
 
 ### K05 · Share change vs same period last year
@@ -131,8 +134,9 @@ JOIN v_brand_period p ON p.brand = c.brand AND p.period_type = c.period_type AND
 ```
 ```dax
 Market share % (same period LY) :=
-VAR y = MAX ( dim_date[year] )
-VAR m = MAX ( dim_date[month] )
+VAR last_date = MAX ( dim_date[date_key] )
+VAR y = YEAR ( last_date )
+VAR m = MONTH ( last_date )
 VAR mkt_ly = CALCULATE ( [Market registrations (period)],
                          REMOVEFILTERS ( dim_date ), dim_date[year] = y - 1, dim_date[month] = m )
 RETURN DIVIDE ( [Registrations (same period LY)], mkt_ly )
@@ -160,17 +164,18 @@ IF ( NOT HASONEVALUE ( dim_brand[brand] )
      || ISBLANK ( cur )
      || SELECTEDVALUE ( dim_brand[brand] ) = "Other brands (AUTRES)",
      BLANK (),
-     RANKX ( FILTER ( ALL ( dim_brand[brand] ),
+     RANKX ( FILTER ( ALL ( dim_brand ),
                       dim_brand[brand] <> "Other brands (AUTRES)"
                       && NOT ISBLANK ( [Registrations (period)] ) ),
              [Registrations (period)], cur, DESC, SKIP ) )
 
 Brands ranked (period) :=
-COUNTROWS ( FILTER ( ALL ( dim_brand[brand] ),
+COUNTROWS ( FILTER ( ALL ( dim_brand ),
                      dim_brand[brand] <> "Other brands (AUTRES)"
                      && NOT ISBLANK ( [Registrations (period)] ) ) )
 ```
 The monthly rank uses the same pattern with `[Registrations (month)]`.
+`ALL ( dim_brand )` (not only the brand column) keeps the rank market-wide even when another brand slicer is active, for example "Chinese-owned only". That matches the SQL definition. *(Changed after the 22 Nov 2026 audit.)*
 **Validated value.** BYD: FY 2024 **30 of 40** · FY 2025 **24 of 40** · Jan–Oct 2024 **32 of 40** · Jan–Oct 2026 **16 of 44**. Monthly: January 2024 **29**, October 2026 **7 of 44**.
 
 ### K07 · Volume gap to a competitor
@@ -278,8 +283,9 @@ SELECT period, market_yoy_pct, seasonality_index FROM v_market_month;
 ```
 ```dax
 Market growth % vs LY :=
-VAR y = MAX ( dim_date[year] )
-VAR m = MAX ( dim_date[month] )
+VAR last_date = MAX ( dim_date[date_key] )
+VAR y = YEAR ( last_date )
+VAR m = MONTH ( last_date )
 VAR prev = CALCULATE ( [Market registrations (period)], REMOVEFILTERS ( dim_date ),
                        dim_date[year] = y - 1, dim_date[month] = m )
 VAR ratio = DIVIDE ( [Market registrations (period)], prev )
